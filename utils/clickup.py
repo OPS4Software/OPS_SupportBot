@@ -1,12 +1,14 @@
 import os
+from dotenv import load_dotenv
+
 import requests
-from config import CLICKUP_TOKEN, CLICKUP_LIST_ID, CLICKUP_TEAM_ID
 
 class ClickUpClient:
     def __init__(self):
-        self.token = CLICKUP_TOKEN
-        self.list_id = CLICKUP_LIST_ID
-        self.team_id = CLICKUP_TEAM_ID
+
+        self.token = os.getenv('CLICKUP_TOKEN')
+        self.list_id = os.getenv('CLICKUP_LIST_ID')
+        self.team_id = os.getenv('CLICKUP_TEAM_ID')
         self.base_url = "https://api.clickup.com/api/v2"
 
     def create_task(self, attachment, id, description):
