@@ -1,3 +1,5 @@
+import os
+
 from aiogram import Router
 from aiogram.types import Message, ReactionTypeEmoji
 from utils.clickup import ClickUpClient
@@ -17,7 +19,6 @@ async def detect_message(message: Message):
         elif message.text != None:
             raw_text = str(message.text)
 
-        print(raw_text)
         paragraphs = raw_text.split("\n")
         transaction_id = None
         for paragraph in paragraphs:
@@ -48,6 +49,8 @@ async def detect_message(message: Message):
         # Create ClickUp task using the class instance
         # TASK: Do normal file loader to click up. Is current one ok?
         file = await message.bot.get_file(screenshot_url)
+        if not os.path.exists("tmp/img/"):
+            os.makedirs("tmp/img/")
         file_local_path = f"tmp/img/{transaction_id}.jpg"
         await message.bot.download_file(file.file_path, file_local_path)
         clickup_client.create_task(file_local_path, transaction_id, notes)
