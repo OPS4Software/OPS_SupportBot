@@ -1,44 +1,59 @@
+import os
+import sys
+
 from aiogram import Router
 from aiogram.types import Message, ReactionTypeEmoji
-from utils.clickup import ClickUpClient
 from utils.validators import validate_transaction_id
 
 import utils.state_machines.transactions_state_machine as state_machine
 
+from utils.xano import XanoClient, XanoShopAnswer
+
 router = Router()
-clickup_client = ClickUpClient()
+xano_client = XanoClient()
 
 @router.message()
 async def detect_message(message: Message):
-    # TASK: checker: is chat register?
-    # TASK: checker: what type of this chat = Merchant/Provider?
-    # TASK: checker: what type of merchant?
-    try:
-        if message.caption != None:
-            raw_text = str(message.caption)
-        elif message.text != None:
-            raw_text = str(message.text)
+    # Checker: is chat register?
+    xano_shops_answer:list[XanoShopAnswer] = xano_client.getShopsByChatId(message.chat.id)
+    if xano_shops_answer == None:
+        return
 
-        paragraphs = raw_text.split("\n")
-        transaction_id = None
-        for paragraph in paragraphs:
-            texts = paragraph.split(" ")
-            for text in texts:
-                if validate_transaction_id(text):
-                    transaction_id = text
-                    break
+    print('shop(s) exists')
 
-        #TEMP: Checker for transaction_id exists by FORMAT
-        if transaction_id == None:
-            print('no trx id')
-            return
-        # TASK: SEND terminal name to  transaction_state_machine.py -> local terminal and write all behavior there
-        state_machine_success = await state_machine.run_state_machine(message, transaction_id, "123")
+    # TASK: checker: what type of merchant? WHAT IS IT??? FOR WHAT??? FIND AN ANSWER FOR IT
+    # try:
+    if message.caption != None:
+        raw_text = str(message.caption)
+    elif message.text != None:
+        raw_text = str(message.text)
 
-        if state_machine_success == False:
-            print('state machine FALSE')
+    paragraphs = raw_text.split("\n")
+    transaction_id = None
+    for paragraph in paragraphs:
+        texts = paragraph.split(" ")
+        for text in texts:
+            if validate_transaction_id(text):
+                transaction_id = text
+                break
 
-        await message.react(reaction=[ReactionTypeEmoji(emoji="👀")])
+    #TEMP: Checker for transaction_id exists by FORMAT
+    if transaction_id == None:
+        return
+    # Run Request state analizator
 
-    except Exception as e:
-        print('pass')
+    shops_id = [int]
+    for shop in xano_shops_answer:
+        shops_id.append(shop.id)
+    state_machine_success = await state_machine.run_state_machine(message, transaction_id, shops_id)
+
+    if state_machine_success == False:
+        print('state machine FALSE')
+        return
+
+    await message.react(reaction=[ReactionTypeEmoji(emoji="👀")])
+
+    # except Exception as e:
+    #     exc_type, exc_obj, exc_tb = sys.exc_info()
+    #     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+    #     print(e, exc_type, fname, exc_tb.tb_lineno)

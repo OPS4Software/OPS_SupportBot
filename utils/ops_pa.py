@@ -1,6 +1,8 @@
 import requests
 import json
+from utils.xano import XanoClient
 
+xano_client = XanoClient()
 
 class PGAnswer:
     def __init__(self, isExists:bool, trx_id:str=None, ref_id:str=None,
@@ -15,10 +17,10 @@ class PGAnswer:
         self.terminal = terminal
 
 
-def check_status(merchant_chat_id:str, trx_id:str) -> PGAnswer:
-    ## TEMP: HARDCORE ZONE
-    # TASK: Take API key from DB based on merchant_chat_id. IF no API key - return PGAnswer FALSE
-    API_Key = "zMimE4ZayUDaR4z3QgFeb6FnPHx5gSV2"
+def check_status(shop_chat_id:int, trx_id:str) -> PGAnswer:
+    API_Key = xano_client.getShopApiKey(shop_chat_id)
+    if API_Key == None:
+        return PGAnswer(isExists=False)
 
     url = f"https://app.inops.net/api/v1/payments/{trx_id}"
     payload = ""

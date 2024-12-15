@@ -13,6 +13,17 @@ async def run_state(message: Message, trx_details:PGAnswer) -> bool:
     return False
 
 async def state_UPI_Deposit(message:Message, trx_details:PGAnswer) -> bool:
+    #Trx status flow
+    match trx_details.state:
+        case "COMPLETED":
+            return await state_UPI_Deposit_COMPLETED(message, trx_details)
+        case "DECLINED":
+            return await state_UPI_Deposit_DECLINED(message, trx_details)
+
+
+async def state_UPI_Deposit_COMPLETED(message:Message, trx_details:PGAnswer) -> bool:
+    return False
+async def state_UPI_Deposit_DECLINED(message:Message, trx_details:PGAnswer) -> bool:
     # TEMP: Checker for screenshot_url exists
     if message.content_type != 'photo':
         print('no screenshot')
@@ -33,5 +44,11 @@ async def state_UPI_Deposit(message:Message, trx_details:PGAnswer) -> bool:
         os.makedirs("tmp/img/")
     file_local_path = f"tmp/img/{trx_details.trx_id}.jpg"
     await message.bot.download_file(file.file_path, file_local_path)
-    clickup_client.create_task(file_local_path, trx_details.trx_id)
+    clickup_client.create_auto_task(file_local_path, trx_details.trx_id)
     return True
+async def state_UPI_Deposit_CANCELED(message:Message, trx_details:PGAnswer) -> bool:
+    return False
+async def state_UPI_Deposit_CHECKOUT(message:Message, trx_details:PGAnswer) -> bool:
+    return False
+async def state_UPI_Deposit_COMPLETED(message:Message, trx_details:PGAnswer) -> bool:
+    return False
