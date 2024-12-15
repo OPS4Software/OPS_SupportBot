@@ -2,6 +2,7 @@ import os
 from enum import Enum
 
 import requests
+from dotenv import load_dotenv
 
 
 class TaskStatus(Enum):
@@ -12,6 +13,7 @@ class TaskStatus(Enum):
 
 class ClickUpClient:
     def __init__(self):
+        load_dotenv()
         self.token = os.getenv('CLICKUP_TOKEN')
         self.team_id = os.getenv('CLICKUP_TEAM_ID')
         self.base_url = os.getenv('CLICKUP_ENDPOINT')
