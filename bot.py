@@ -16,6 +16,7 @@ dp.include_routers(setup_router,
                    transaction_router)
 
 async def main():
+    load_dotenv()
     await dp.start_polling(bot)
 
 if __name__ == "__main__":

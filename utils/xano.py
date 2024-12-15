@@ -1,5 +1,7 @@
 import os, json
 import requests
+from dotenv import load_dotenv
+
 
 class XanoShopAnswer:
     def __init__(self, id:int=None, merchant_id:str=None, management_chat:str=None, support_chat:str=None):
@@ -15,6 +17,7 @@ class XanoProviderAnswer:
         self.support_chat_id_tg = support_chat_id_tg
 class XanoClient:
     def __init__(self):
+        load_dotenv()
         self.email = os.getenv('XANO_EMAIL')
         self.password = os.getenv('XANO_PASS')
         self.base_url = os.getenv('XANO_ENDPOINT')
@@ -22,7 +25,7 @@ class XanoClient:
     def getShopApiKey(self, shop_id:int) -> str:
         token = self.auth()
         if token == None:
-            return XanoShopAnswer(isExists=False)
+            return None
 
         url = f"{self.base_url}/shops/{shop_id}/apikey"
 
@@ -43,7 +46,7 @@ class XanoClient:
     def getShopsByChatId(self, chat_id:str) -> list[XanoShopAnswer]:
         token = self.auth()
         if token == None:
-            return XanoShopAnswer(isExists=False)
+            return None
 
         url = f"{self.base_url}/shops/{chat_id}/"
 
@@ -77,7 +80,7 @@ class XanoClient:
     def getProviderByTerminalName(self, terminal_name:str) -> XanoProviderAnswer:
         token = self.auth()
         if token == None:
-            return XanoProviderAnswer(isExists=False)
+            return None
 
         url = f"{self.base_url}/provider/{terminal_name}/"
 
