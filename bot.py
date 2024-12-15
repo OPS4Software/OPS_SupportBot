@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 from handlers.transaction import router as transaction_router
 from handlers.setup import router as setup_router
 
-load_dotenv()
 bot = Bot(token=os.getenv('TOKEN'))
 dp = Dispatcher()
 

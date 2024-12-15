@@ -2,6 +2,7 @@ from aiogram.types import Message
 import utils.ops_pa as ops_pa
 
 import utils.state_machines.create_task.India.UPI_IMPS_701 as apm701
+import utils.state_machines.create_task.India.UPI_IMPS_666 as apm000
 
 
 # TASK: RECEIVE terminal name IF == *_UPI/IMPS_701 ->go to local terminal state machine and write all behavior there
@@ -21,6 +22,9 @@ async def run_state_machine(message: Message, transaction_id: str, shops_id: lis
 
     terminal_id = answer.terminal.split('_')[-1]
     match int(terminal_id):
+        case 666:
+            success = await apm000.run_state(message, answer)
+            return success
         case 701:
             success = await apm701.run_state(message, answer)
             return success
