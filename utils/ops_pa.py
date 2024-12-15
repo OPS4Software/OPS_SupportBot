@@ -3,9 +3,9 @@ import json
 
 
 class PGAnswer:
-    def __init__(self, isExists, status=None, paymentType=None, terminal=None):
+    def __init__(self, isExists, state=None, paymentType=None, terminal=None):
         self.isExists = isExists
-        self.status = status
+        self.state = state
         self.paymentType = paymentType
         self.terminal = terminal
 
@@ -24,6 +24,17 @@ def check_status(merchant_chat_id: str, trx_id: str) -> PGAnswer:
 
     response = requests.request("GET", url, headers=headers, data=payload)
     data_raw = response.text
-    data = json.load(data_raw)
-    status = data.get('status')
-    print(status)
+
+    data = json.loads(data_raw)
+    status = int(data['status'])
+
+    if status == 404:
+        answer = PGAnswer(False)
+        return answer
+    elif status == 200:
+        answer = PGAnswer(isExists=True,
+                          state=data['result']['state'],
+                          paymentType=data['result']['paymentType'],
+                          terminal=data['result']['terminalName'])
+        return answer
+

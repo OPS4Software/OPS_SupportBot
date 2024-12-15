@@ -15,7 +15,7 @@ async def detect_message(message: Message):
     # TASK: checker: is chat register?
     # TASK: checker: what type of this chat = Merchant/Provider?
     # TASK: checker: what type of merchant?
-    #try:
+    try:
         if message.caption != None:
             raw_text = str(message.caption)
         elif message.text != None:
@@ -36,7 +36,13 @@ async def detect_message(message: Message):
             return
 
         # TASK: checker: what type terminal?
-        ops.check_status("123", transaction_id)
+        answer = ops.check_status("123", transaction_id)
+        if answer.isExists == False:
+            message.reply("This transaction ID doesn't exists\nTry again with correct OPS transaction ID inside")
+            return
+
+        # TASK: SEND terminal name to  transaction_state_machine.py -> local terminal and write all behavior there
+        print(answer.terminal)
 
         if message.content_type != 'photo':
             print('no photo')
@@ -60,5 +66,5 @@ async def detect_message(message: Message):
 
         await message.react(reaction=[ReactionTypeEmoji(emoji="👀")])
 
-    #except Exception as e:
-    #    print('pass')
+    except Exception as e:
+        print('pass')
