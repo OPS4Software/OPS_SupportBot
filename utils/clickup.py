@@ -13,20 +13,19 @@ class TaskStatus(Enum):
 class ClickUpClient:
     def __init__(self):
         self.token = os.getenv('CLICKUP_TOKEN')
-        self.list_id = os.getenv('CLICKUP_LIST_ID')
         self.team_id = os.getenv('CLICKUP_TEAM_ID')
-        self.base_url = "https://api.clickup.com/api/v2"
+        self.base_url = os.getenv('CLICKUP_ENDPOINT')
 
-    def create_manual_task(self, attachment, pg_trx_id, description:str = None):
-        self.create_task(attachment=attachment, pg_trx_id=pg_trx_id, description=description, task_status=TaskStatus.TO_DO)
+    def create_manual_task(self, list_id, attachment, pg_trx_id, description:str = None):
+        self.create_task(list_id=list_id, attachment=attachment, pg_trx_id=pg_trx_id, description=description, task_status=TaskStatus.TO_DO)
 
-    def create_auto_task(self, attachment, pg_trx_id, description:str = None):
+    def create_auto_task(self, list_id, attachment, pg_trx_id, description:str = None):
         tags = ["auto"]
-        self.create_task(attachment=attachment, pg_trx_id=pg_trx_id, description=description, task_status=TaskStatus.IN_PROGRESS, tags=tags)
+        self.create_task(list_id=list_id, attachment=attachment, pg_trx_id=pg_trx_id, description=description, task_status=TaskStatus.IN_PROGRESS, tags=tags)
 
-    def create_task(self, attachment, pg_trx_id, description:str=None,
+    def create_task(self, list_id, attachment, pg_trx_id, description:str=None,
                     task_status:TaskStatus=TaskStatus.TO_DO, tags:[str]=None):
-        url = f"{self.base_url}/list/{self.list_id}/task"
+        url = f"{self.base_url}/list/{list_id}/task"
 
         headers = {
             "Content-Type": "application/json",

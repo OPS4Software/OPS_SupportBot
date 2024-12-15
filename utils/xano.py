@@ -7,6 +7,12 @@ class XanoShopAnswer:
         self.management_chat = management_chat
         self.support_chat = support_chat
         self.merchant_id = merchant_id
+class XanoProviderAnswer:
+    def __init__(self, provider_name:int=None, terminal_name:str=None, list_id_clickup:str=None, support_chat_id_tg:str=None):
+        self.provider_name = provider_name
+        self.terminal_name = terminal_name
+        self.list_id_clickup = list_id_clickup
+        self.support_chat_id_tg = support_chat_id_tg
 class XanoClient:
     def __init__(self):
         self.email = os.getenv('XANO_EMAIL')
@@ -68,6 +74,31 @@ class XanoClient:
             print(len(answer_array))
             return answer_array
 
+    def getProviderByTerminalName(self, terminal_name:str) -> XanoProviderAnswer:
+        token = self.auth()
+        if token == None:
+            return XanoProviderAnswer(isExists=False)
+
+        url = f"{self.base_url}/provider/{terminal_name}/"
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": token
+        }
+        payload = {
+            "provider_terminal_name": terminal_name
+        }
+
+        response = requests.get(url, json=payload, headers=headers)
+        if response.status_code != 200:
+            return None
+        else:
+            data = response.json()
+            answer = XanoProviderAnswer(provider_name=data['provider_name'],
+                                        terminal_name=data['terminal_name'],
+                                        list_id_clickup=data['list_id_clickup'],
+                                        support_chat_id_tg=data['support_chat_id_tg'],)
+            return answer
     def getMerchantsList(self):
         token = self.auth()
         url = f"{self.base_url}/merchant"
