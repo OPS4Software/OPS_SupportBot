@@ -21,6 +21,14 @@ async def state_UPI_Deposit(message:Message, trx_details:PGAnswer) -> bool:
             return await state_UPI_Deposit_COMPLETED(message, trx_details)
         case "DECLINED":
             return await state_UPI_Deposit_DECLINED(message, trx_details)
+        case "CANCELLED":
+            return await state_UPI_Deposit_CANCELLED(message, trx_details)
+        case "CHECKOUT":
+            return await state_UPI_Deposit_CHECKOUT(message, trx_details)
+        case "AWAITING_WEBHOOK":
+            return await state_UPI_Deposit_AWAITING_WEBHOOK(message, trx_details)
+        case "AWAITING_REDIRECT":
+            return await state_UPI_Deposit_AWAITING_REDIRECT(message, trx_details)
 
 
 async def state_UPI_Deposit_COMPLETED(message:Message, trx_details:PGAnswer) -> bool:
@@ -51,9 +59,11 @@ async def state_UPI_Deposit_DECLINED(message:Message, trx_details:PGAnswer) -> b
     await message.bot.download_file(file.file_path, file_local_path)
     clickup_client.create_auto_task(list_id=provider.list_id_clickup, attachment=file_local_path, pg_trx_id=trx_details.trx_id)
     return True
-async def state_UPI_Deposit_CANCELED(message:Message, trx_details:PGAnswer) -> bool:
+async def state_UPI_Deposit_CANCELLED(message:Message, trx_details:PGAnswer) -> bool:
     return False
 async def state_UPI_Deposit_CHECKOUT(message:Message, trx_details:PGAnswer) -> bool:
     return False
-async def state_UPI_Deposit_COMPLETED(message:Message, trx_details:PGAnswer) -> bool:
+async def state_UPI_Deposit_AWAITING_WEBHOOK(message:Message, trx_details:PGAnswer) -> bool:
+    return False
+async def state_UPI_Deposit_AWAITING_REDIRECT(message:Message, trx_details:PGAnswer) -> bool:
     return False
