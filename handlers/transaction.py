@@ -1,11 +1,9 @@
-import os
-
 from aiogram import Router
 from aiogram.types import Message, ReactionTypeEmoji
 from utils.clickup import ClickUpClient
 from utils.validators import validate_transaction_id
 
-import utils.ops_pa as ops
+import utils.state_machines.transactions_state_machine as state_machine
 
 router = Router()
 clickup_client = ClickUpClient()
@@ -30,39 +28,15 @@ async def detect_message(message: Message):
                     transaction_id = text
                     break
 
-        #TEMP: Checker for transaction_id exists
+        #TEMP: Checker for transaction_id exists by FORMAT
         if transaction_id == None:
             print('no trx id')
             return
-
-        # TASK: checker: what type terminal?
-        answer = ops.check_status("123", transaction_id)
-        if answer.isExists == False:
-            message.reply("This transaction ID doesn't exists\nTry again with correct OPS transaction ID inside")
-            return
-
         # TASK: SEND terminal name to  transaction_state_machine.py -> local terminal and write all behavior there
-        print(answer.terminal)
+        state_machine_success = await state_machine.run_state_machine(message, transaction_id, "123")
 
-        if message.content_type != 'photo':
-            print('no photo')
-            return
-        screenshot_url = message.photo[-1].file_id
-        notes = "NOTES"
-
-        # TEMP: Checker for screenshot_url exists
-        if not screenshot_url:
-            print('no screenshot')
-            return
-
-        # Create ClickUp task using the class instance
-        # TASK: Do normal file loader to click up. Is current one ok?
-        file = await message.bot.get_file(screenshot_url)
-        if not os.path.exists("tmp/img/"):
-            os.makedirs("tmp/img/")
-        file_local_path = f"tmp/img/{transaction_id}.jpg"
-        await message.bot.download_file(file.file_path, file_local_path)
-        clickup_client.create_task(file_local_path, transaction_id, notes)
+        if state_machine_success == False:
+            print('state machine FALSE')
 
         await message.react(reaction=[ReactionTypeEmoji(emoji="👀")])
 
