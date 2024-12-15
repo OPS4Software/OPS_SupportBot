@@ -5,6 +5,8 @@ from aiogram.types import Message, ReactionTypeEmoji
 from utils.clickup import ClickUpClient
 from utils.validators import validate_transaction_id
 
+import utils.ops_pa as ops
+
 router = Router()
 clickup_client = ClickUpClient()
 
@@ -13,7 +15,7 @@ async def detect_message(message: Message):
     # TASK: checker: is chat register?
     # TASK: checker: what type of this chat = Merchant/Provider?
     # TASK: checker: what type of merchant?
-    try:
+    #try:
         if message.caption != None:
             raw_text = str(message.caption)
         elif message.text != None:
@@ -34,6 +36,7 @@ async def detect_message(message: Message):
             return
 
         # TASK: checker: what type terminal?
+        ops.check_status("123", transaction_id)
 
         if message.content_type != 'photo':
             print('no photo')
@@ -57,5 +60,5 @@ async def detect_message(message: Message):
 
         await message.react(reaction=[ReactionTypeEmoji(emoji="👀")])
 
-    except Exception as e:
-        print('pass')
+    #except Exception as e:
+    #    print('pass')
