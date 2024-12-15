@@ -93,6 +93,8 @@ class XanoClient:
         }
 
         response = requests.get(url, json=payload, headers=headers)
+        print(response.status_code)
+        print(response.text)
         if response.status_code != 200:
             return None
         else:
