@@ -140,3 +140,37 @@ class XanoClient:
         else:
             token = None
         return token
+    
+    def transaction_id_exists(self, transaction_id: str) -> bool:
+        """Proverava da li transaction_id postoji u bazi."""
+        token = self.auth()
+        if token is None:
+            return False
+
+        url = f"{self.base_url}/transactions/check"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": token
+        }
+        payload = {"transaction_id": transaction_id}
+
+        response = requests.post(url, json=payload, headers=headers)
+        if response.status_code == 200:
+            return response.json().get("exists", False)
+        return False
+
+    def add_transaction_id(self, transaction_id: str):
+        """Dodaje transaction_id u bazu."""
+        token = self.auth()
+        if token is None:
+            return False
+
+        url = f"{self.base_url}/transactions"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": token
+        }
+        payload = {"transaction_id": transaction_id}
+
+        response = requests.post(url, json=payload, headers=headers)
+        return response.status_code == 201

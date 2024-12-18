@@ -53,6 +53,15 @@ async def detect_message(message: Message):
 
     await message.react(reaction=[ReactionTypeEmoji(emoji="👀")])
 
+        # Proveri da li transaction_id već postoji u Xano bazi
+    if xano_client.transaction_id_exists(transaction_id):
+        await message.answer("Ticket already submitted")
+        return
+
+    # Ako transaction_id ne postoji, dodaj ga u bazu
+    xano_client.add_transaction_id(transaction_id)
+
+
     # except Exception as e:
     #     exc_type, exc_obj, exc_tb = sys.exc_info()
     #     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
