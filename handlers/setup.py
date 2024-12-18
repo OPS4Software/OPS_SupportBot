@@ -16,3 +16,8 @@ async def getchatid(message: types.Message):
         return
 
     await message.answer(f'Chat id: {message.chat.id}\nHave easy setup, {message.from_user.first_name}')
+
+@router.message(Command("test"))
+async def getchatid(message: types.Message):
+    isTrxExists = xano_client.transaction_id_exists(transaction_id="tarragonnectarine")
+    await message.answer(f"{isTrxExists}")

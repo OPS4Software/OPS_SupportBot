@@ -1,4 +1,6 @@
 import os, json
+from datetime import datetime
+
 import requests
 from dotenv import load_dotenv
 
@@ -15,6 +17,22 @@ class XanoProviderAnswer:
         self.terminal_name = terminal_name
         self.list_id_clickup = list_id_clickup
         self.support_chat_id_tg = support_chat_id_tg
+
+class XanoTrxRequestAnswer:
+    def __init__(self, id:int=None, shop_id:int=None, provider_id:int=None, pg_id:int=None, trx_id:str=None,
+                 task_id_click_up:str=None, provider_support_chat_message_id_tg:str=None, merchant_support_chat_message_id_tg:str=None,
+                 closed:bool=None, manual:bool=None, created_at:datetime=None):
+        self.id = id
+        self.shop_id = shop_id
+        self.provider_id = provider_id
+        self.pg_id = pg_id
+        self.trx_id = trx_id
+        self.task_id_click_up = task_id_click_up
+        self.provider_support_chat_message_id_tg = provider_support_chat_message_id_tg
+        self.merchant_support_chat_message_id_tg = merchant_support_chat_message_id_tg
+        self.closed = closed
+        self.manual = manual
+        self.created_at = created_at
 class XanoClient:
     def __init__(self):
         load_dotenv()
@@ -147,16 +165,23 @@ class XanoClient:
         if token is None:
             return False
 
-        url = f"{self.base_url}/transactions/check"
+        url = f"{self.base_url}/trxrequests/{transaction_id}/check"
         headers = {
             "Content-Type": "application/json",
             "Authorization": token
         }
-        payload = {"transaction_id": transaction_id}
+        payload = {"pg_id": '0',
+                   "trx_id": transaction_id
+                   }
 
-        response = requests.post(url, json=payload, headers=headers)
-        if response.status_code == 200:
-            return response.json().get("exists", False)
+        response = requests.get(url, json=payload, headers=headers)
+        print(response.status_code)
+        if response.status_code != 200:
+            return False
+        else:
+            data = response.json()
+            return len(data) > 0
+
         return False
 
     def add_transaction_id(self, transaction_id: str):
