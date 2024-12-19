@@ -63,8 +63,26 @@ async def state_UPI_Deposit_DECLINED(message:Message, trx_details:PGAnswer) -> b
     file_local_path = f"tmp/img/{trx_details.trx_id}.jpg"
     await message.bot.download_file(file.file_path, file_local_path)
     data = clickup_client.create_auto_task(list_id=provider.list_id_clickup, attachment=file_local_path, pg_trx_id=trx_details.trx_id)
+
     # Ako transaction_id ne postoji, dodaj ga u bazu
-    return xano_client.add_trxrequest(trx_id=trx_details.trx_id, shop_data=, provider_data=, task_id_ca=data['id'], isManualTask=False)
+    shops_data = {
+        "shop_id": trx_details.shop_id,
+        "shop_name": trx_details.shop_name,
+        "support_chat": trx_details.support_chat,
+        "api_key": trx_details.api_key,
+        "management_chat": trx_details.management_chat,
+    }
+    providers_data = {
+        "provider_id": trx_details.provider_id,
+        "provider_name": provider.provider_name,
+        "terminal_name": provider.terminal_name,
+        "list_id_clickup": provider.list_id_clickup,
+        "support_chat_id_tg": provider.support_chat_id_tg,
+    }
+    return xano_client.add_trxrequest(trx_id=trx_details.trx_id, shop_data=shops_data, provider_data=providers_data, task_id_ca=data['id'], isManualTask=False)
+
+
+
 async def state_UPI_Deposit_CANCELLED(message:Message, trx_details:PGAnswer) -> bool:
     return False
 async def state_UPI_Deposit_CHECKOUT(message:Message, trx_details:PGAnswer) -> bool:
