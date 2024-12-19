@@ -71,6 +71,6 @@ new_transaction = {
 result = xano_client.transaction_id_exists(transaction_id_to_check, new_transaction)
 
 if result:
-    print("Operacija uspešno završena.")
+    print("Succes add it")
 else:
-    print("Došlo je do greške tokom operacije.")
+    print("Error acured")
