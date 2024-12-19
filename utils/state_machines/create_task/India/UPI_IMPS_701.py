@@ -54,7 +54,7 @@ async def state_UPI_Deposit_DECLINED(message:Message, trx_details:PGAnswer) -> b
     # TASK: Do normal file loader to click up. Is current one ok?
     file = await message.bot.get_file(screenshot_url)
     if not os.path.exists("tmp/img/"):
-        os.makedirs("tmp/img/")
+        os.makedirs("tmp/img/", mode=0o777)
     file_local_path = f"tmp/img/{trx_details.trx_id}.jpg"
     await message.bot.download_file(file.file_path, file_local_path)
     clickup_client.create_auto_task(list_id=provider.list_id_clickup, attachment=file_local_path, pg_trx_id=trx_details.trx_id)
