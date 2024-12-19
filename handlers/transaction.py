@@ -42,7 +42,7 @@ async def detect_message(message: Message):
         return
     # Run Request state analizator
 
-    shops_id = [int]
+    shops_id = []
     for shop in xano_shops_answer:
         shops_id.append(shop.id)
     state_machine_success = await state_machine.run_state_machine(message, transaction_id, shops_id)
@@ -52,14 +52,6 @@ async def detect_message(message: Message):
         return
 
     await message.react(reaction=[ReactionTypeEmoji(emoji="👀")])
-
-        # Proveri da li transaction_id već postoji u Xano bazi
-    if xano_client.transaction_id_exists(transaction_id):
-        await message.answer("Ticket already submitted")
-        return
-
-    # Ako transaction_id ne postoji, dodaj ga u bazu
-    xano_client.add_transaction_id(transaction_id)
 
 
     # except Exception as e:

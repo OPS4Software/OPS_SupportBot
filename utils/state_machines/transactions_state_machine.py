@@ -10,11 +10,13 @@ import utils.state_machines.create_task.India.UPI_IMPS_666 as apm000
 # Check trx exists
 async def run_state_machine(message: Message, transaction_id: str, shops_id: list[int]) -> bool:
     trx_found = False
+    shop_id = None
     for shop in shops_id:
         answer = ops_pa.check_status(shop, transaction_id)
         print(answer.isExists)
         if answer.isExists:
             trx_found = True
+            shop_id = shop
             break
     if trx_found == False:
         await message.reply("This transaction ID doesn't exists\nTry again with correct OPS transaction ID inside")
@@ -23,10 +25,10 @@ async def run_state_machine(message: Message, transaction_id: str, shops_id: lis
     terminal_id = answer.terminal.split('_')[-1]
     match int(terminal_id):
         case 666:
-            success = await apm000.run_state(message, answer)
+            success = await apm000.run_state(message, answer, shop_id)
             return success
         case 701:
-            success = await apm701.run_state(message, answer)
+            success = await apm701.run_state(message, answer, shop_id)
             return success
 
     return False

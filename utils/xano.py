@@ -4,7 +4,6 @@ from datetime import datetime
 import requests
 from dotenv import load_dotenv
 
-
 class XanoShopAnswer:
     def __init__(self, id:int=None, merchant_id:str=None, management_chat:str=None, support_chat:str=None):
         self.id = id
@@ -17,7 +16,6 @@ class XanoProviderAnswer:
         self.terminal_name = terminal_name
         self.list_id_clickup = list_id_clickup
         self.support_chat_id_tg = support_chat_id_tg
-
 class XanoTrxRequestAnswer:
     def __init__(self, id:int=None, shop_id:int=None, provider_id:int=None, pg_id:int=None, trx_id:str=None,
                  task_id_click_up:str=None, provider_support_chat_message_id_tg:str=None, merchant_support_chat_message_id_tg:str=None,
@@ -44,7 +42,7 @@ class XanoClient:
         token = self.auth()
         if token == None:
             return None
-
+        print(f"shop id before request: {shop_id}")
         url = f"{self.base_url}/shops/{shop_id}/apikey"
 
         headers = {
@@ -52,7 +50,7 @@ class XanoClient:
             "Authorization": token
         }
         payload = {
-            "shops_id": f"{shop_id}"
+            "shops_id": shop_id
         }
 
         response = requests.get(url, json=payload, headers=headers)
@@ -139,26 +137,6 @@ class XanoClient:
         data = json.loads(data_raw)
         return
 
-    def auth(self) -> str:
-        url = f"{self.base_url}/auth/login"
-
-        headers = {
-            "Content-Type": "application/json",
-        }
-        payload = {
-                    "email": self.email,
-                    "password": self.password
-                }
-
-        response = requests.post(url, json=payload, headers=headers)
-        if response.status_code == 200:
-            data_raw = response.text
-            data = json.loads(data_raw)
-            token = data['authToken']
-        else:
-            token = None
-        return token
-    
     def transaction_id_exists(self, transaction_id: str) -> bool:
         """Proverava da li transaction_id postoji u bazi."""
         token = self.auth()
@@ -183,19 +161,47 @@ class XanoClient:
             return len(data) > 0
 
         return False
-
-    def add_transaction_id(self, transaction_id: str):
-        """Dodaje transaction_id u bazu."""
+    def add_trxrequest(self, trx_id:str, shop_data:XanoShopAnswer, provider_data:XanoProviderAnswer, task_id_ca:str, isManualTask:bool) -> bool:
         token = self.auth()
-        if token is None:
+        if token == None:
             return False
+        url = f"{self.base_url}/trxrequests"
 
-        url = f"{self.base_url}/transactions"
         headers = {
             "Content-Type": "application/json",
             "Authorization": token
         }
-        payload = {"transaction_id": transaction_id}
+        payload = {
+                    "shop_id": shop_data.id,
+                    "provider_id": provider_data.id,
+                    "pg_id": 0,
+                    "trx_id": trx_id,
+                    "task_id_click_up": task_id_ca,
+                    "provider_support_chat_message_id_tg": provider_data.support_chat_id_tg,
+                    "shop_support_chat_message_id_tg": shop_data.support_chat,
+                    "Closed": False,
+                    "Manual": isManualTask
+                }
 
         response = requests.post(url, json=payload, headers=headers)
-        return response.status_code == 201
+
+        return response.status_code == 200
+    def auth(self) -> str:
+        url = f"{self.base_url}/auth/login"
+
+        headers = {
+            "Content-Type": "application/json",
+        }
+        payload = {
+                    "email": self.email,
+                    "password": self.password
+                }
+
+        response = requests.post(url, json=payload, headers=headers)
+        if response.status_code == 200:
+            data_raw = response.text
+            data = json.loads(data_raw)
+            token = data['authToken']
+        else:
+            token = None
+        return token

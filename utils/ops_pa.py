@@ -18,6 +18,7 @@ class PGAnswer:
 
 def check_status(shop_chat_id:int, trx_id:str) -> PGAnswer:
     API_Key = xano_client.getShopApiKey(shop_chat_id)
+    print(API_Key)
     if API_Key == None:
         return PGAnswer(isExists=False)
 
