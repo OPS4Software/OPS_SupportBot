@@ -24,7 +24,7 @@ async def run_bot(bot):
     await dp.start_polling(bot)
 async def run_trx_state_machine(bot):
     TRX_STATE_MACHINE = Trx_State_Machine()
-    await TRX_STATE_MACHINE.start_polling(bot, polling_timeout=10)
+    await TRX_STATE_MACHINE.start_polling(bot, polling_timeout=120)
 
 if __name__ == "__main__":
     asyncio.run(main())
