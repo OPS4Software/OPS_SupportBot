@@ -33,8 +33,6 @@ async def detect_message(message: Message):
     # Checker: is chat register
     xano_shops_answer:list[XanoShop] = XANO_CLIENT.get_shops_by_support_chat_id(str(message.chat.id))
     if xano_shops_answer == None:
-        await message.reply("@Serggiant @SavaOps, I couldn't solve it")
-        print(f"Chat {message.chat.id} is not reqistered as Shop")
         return
     # Run Request state analizator
     state_machine_success = await state_machine.run_state_machine(message, transaction_id, xano_shops_answer)
