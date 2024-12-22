@@ -29,16 +29,15 @@ class PGAnswer:
         self.terminal = terminal
 
 
-def check_status(shop_id:int, trx_id:str) -> PGAnswer | None:
-    api_key = XANO_CLIENT.get_shop_API_key(shop_id)
-    if api_key == None:
+def check_status(shop_api_key:str, trx_id:str) -> PGAnswer | None:
+    if shop_api_key == None:
         return None
 
     url = f"https://app.inops.net/api/v1/payments/{trx_id}"
     payload = ""
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {api_key}'
+        'Authorization': f'Bearer {shop_api_key}'
     }
 
     response = requests.request("GET", url, headers=headers, data=payload)

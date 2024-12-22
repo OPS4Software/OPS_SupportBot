@@ -11,7 +11,7 @@ async def run_state_machine(message: Message, transaction_id: str, shops: list[X
     pg_answer = None
     shop = None
     for possible_shop in shops:
-        pg_answer = ops_pa.check_status(possible_shop.id, transaction_id)
+        pg_answer = ops_pa.check_status(possible_shop.api_key, transaction_id)
         if pg_answer is not None:
             shop = possible_shop
             break
