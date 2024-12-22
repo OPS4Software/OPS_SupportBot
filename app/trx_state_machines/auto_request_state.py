@@ -10,6 +10,9 @@ from app.external_connections.clickup import CLICKUP_CLIENT, CU_TaskStatus
 
 async def check_trx(trxrequest_data: XanoTrxRequest, bot) -> None:
     pg_data = ops_pa.check_status(shop_id=str(trxrequest_data.shop_id), trx_id=trxrequest_data.trx_id)
+    if pg_data == None:
+        print(f"Couldn't check trx request: {trxrequest_data.id}")
+        return
     if pg_data.state == PG_TRX_STATUS.COMPLETED.value:
         # Change DB Request status to CLOSE
         trxrequest_data.closed = True
