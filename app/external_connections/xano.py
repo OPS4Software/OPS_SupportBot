@@ -7,11 +7,12 @@ from dotenv import load_dotenv
 
 
 class XanoShop:
-    def __init__(self, id: int = None, merchant_id: int = None, management_chat: str = None, support_chat: str = None):
+    def __init__(self, id: int = None, merchant_id: int = None, management_chat: str = None, support_chat: str = None, api_key:str=None):
         self.id = id
         self.merchant_id = merchant_id
         self.management_chat = management_chat
         self.support_chat = support_chat
+        self.api_key = api_key
 class XanoProvider:
     def __init__(self, id: int = None, provider_name: int = None, terminal_name: str = None,
                  list_id_clickup: str = None, support_chat_id_tg: str = None):
@@ -26,7 +27,7 @@ class XanoTrxRequest:
                  task_id_click_up: str = None,
                  provider_support_chat_id: int = None, provider_message_id: int = None,
                  shop_support_chat_id: int = None, shop_message_id: int = None,
-                 closed: bool = None, manual: bool = None, created_at: datetime = None):
+                 closed: bool = None, manual: bool = None, created_at: datetime = None, shop_api_key:str = None):
         self.id = id
         self.shop_id = shop_id
         self.provider_id = provider_id
@@ -40,6 +41,7 @@ class XanoTrxRequest:
         self.closed = closed
         self.manual = manual
         self.created_at = created_at
+        self.shop_api_key = shop_api_key
 
 class XanoClient:
     def __init__(self):
@@ -74,7 +76,8 @@ class XanoClient:
             shop = XanoShop(id=data['id'],
                             merchant_id=data['merchant_id'],
                             support_chat=data['support_chat_id'],
-                            management_chat=data['management_chat_id']
+                            management_chat=data['management_chat_id'],
+                            api_key=data['api_key']
                             )
             return shop
     def get_shop_API_key(self, shop_id: str) -> Any | None:
@@ -130,6 +133,7 @@ class XanoClient:
                                     merchant_id=item.get('merchant_id'),
                                     support_chat=item.get('support_chat'),
                                     management_chat=item.get('management_chat'),
+                                    api_key=item.get('api_key')
                                     )
                     answer_array.append(shop)
                 except Exception as e:
@@ -227,7 +231,8 @@ class XanoClient:
                                               shop_message_id=item.get('shop_message_id'),
                                               closed=item.get('Closed'),
                                               manual=item.get('ManualTicket'),
-                                              created_at=item.get('created_at')
+                                              created_at=item.get('created_at'),
+                                              shop_api_key=item.get('shop_api_key')
                                               )
                 answer_array.append(trx_requests)
             except Exception as e:
@@ -253,7 +258,8 @@ class XanoClient:
             "shop_support_chat_id": shop_data.support_chat,
             "shop_message_id": merch_mes_id,
             "Closed": False,
-            "ManualTicket": is_manual_ticket
+            "ManualTicket": is_manual_ticket,
+            "shop_api_key": shop_data.api_key
         }
 
         response = requests.post(url, json=payload, headers=headers)
@@ -283,7 +289,8 @@ class XanoClient:
             "shop_support_chat_id": trx_data.shop_support_chat_id,
             "shop_message_id": trx_data.shop_message_id,
             "Closed": trx_data.closed,
-            "ManualTicket": trx_data.manual
+            "ManualTicket": trx_data.manual,
+            "shop_api_key": trx_data.shop_api_key
         }
 
         response = requests.patch(url, json=payload, headers=headers)
