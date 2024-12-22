@@ -1,14 +1,27 @@
+from enum import Enum
+
 import requests
 import json
-from utils.xano import XanoClient
+from app.external_connections.xano import XANO_CLIENT, XanoShop
 
-xano_client = XanoClient()
+class PG_TRX_STATUS(Enum):
+    COMPLETED = "COMPLETED"
+    DECLINED = "DECLINED"
+    CHARGEBACK = "CHARGEBACK"
+    CANCELLED = "CANCELLED"
+    CHECKOUT = "CHECKOUT"
+    AWAITING_WEBHOOK = "AWAITING_WEBHOOK"
+    AWAITING_REDIRECT = "AWAITING_REDIRECT"
+class PG_PAYMENT_TYPE(Enum):
+    DEPOSIT = "DEPOSIT"
+    WITHDRAWAL = "WITHDRAWAL"
+    REFUND = "REFUND"
+    CHARGEBACK = "CHARGEBACK"
 
 class PGAnswer:
-    def __init__(self, isExists:bool, trx_id:str=None,
+    def __init__(self, trx_id:str=None,
                  state:str=None, paymentType:str=None, paymentMethod:str=None,
                  terminal:str=None):
-        self.isExists = isExists
         self.trx_id = trx_id
         self.state = state
         self.paymentType = paymentType
@@ -16,17 +29,16 @@ class PGAnswer:
         self.terminal = terminal
 
 
-def check_status(shop_chat_id:int, trx_id:str) -> PGAnswer:
-    API_Key = xano_client.getShopApiKey(shop_chat_id)
-    print(API_Key)
-    if API_Key == None:
-        return PGAnswer(isExists=False)
+def check_status(shop_id:int, trx_id:str) -> PGAnswer | None:
+    api_key = XANO_CLIENT.get_shop_API_key(shop_id)
+    if api_key == None:
+        return None
 
     url = f"https://app.inops.net/api/v1/payments/{trx_id}"
     payload = ""
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {API_Key}'
+        'Authorization': f'Bearer {api_key}'
     }
 
     response = requests.request("GET", url, headers=headers, data=payload)
@@ -35,12 +47,11 @@ def check_status(shop_chat_id:int, trx_id:str) -> PGAnswer:
     data = json.loads(data_raw)
     status = int(data['status'])
     if status == 200:
-        answer = PGAnswer(isExists=True,
-                          trx_id=data['result']['id'],
+        answer = PGAnswer(trx_id=data['result']['id'],
                           state=data['result']['state'],
                           paymentType=data['result']['paymentType'],
                           paymentMethod=data['result']['paymentMethod'],
                           terminal=data['result']['terminalName'])
     else:
-        answer = PGAnswer(False)
+        answer = None
     return answer
