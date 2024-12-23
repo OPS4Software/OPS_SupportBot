@@ -14,10 +14,13 @@ router = Router()
 async def detect_message(message: Message):
     TIME_DEBUGGER.debug_time("start")
     # try:
+    raw_text = None
     if message.caption != None:
         raw_text = str(message.caption)
     elif message.text != None:
         raw_text = str(message.text)
+    if raw_text == None:
+        return
     paragraphs = raw_text.split("\n")
     transaction_id = None
     for paragraph in paragraphs:

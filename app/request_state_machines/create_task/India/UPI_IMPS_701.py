@@ -21,6 +21,8 @@ async def state_UPI_Deposit(message: Message, trx_details: PGAnswer, shop: XanoS
             return await state_UPI_Deposit_DECLINED(message=message, trx_details=trx_details, shop=shop)
         case PG_TRX_STATUS.CANCELLED.value:
             return await state_UPI_Deposit_CANCELLED(message=message, trx_details=trx_details, shop=shop)
+        case PG_TRX_STATUS.PENDING.value:
+            return await state_UPI_Deposit_PENDING(message=message, trx_details=trx_details, shop=shop)
         case PG_TRX_STATUS.CHECKOUT.value:
             return await state_UPI_Deposit_CHECKOUT(message=message, trx_details=trx_details, shop=shop)
         case PG_TRX_STATUS.AWAITING_WEBHOOK.value:
@@ -39,6 +41,8 @@ async def state_UPI_Deposit_DECLINED(message: Message, trx_details: PGAnswer, sh
 async def state_UPI_Deposit_CANCELLED(message: Message, trx_details: PGAnswer, shop: XanoShop) -> bool:
     await message.reply("May you doublecheck transaction id, pls. The specified transaction id has not gone to the bank")
     return True
+async def state_UPI_Deposit_PENDING(message: Message, trx_details: PGAnswer, shop: XanoShop) -> bool:
+    return await beh_send_auto_ticket(message, trx_details, shop)
 async def state_UPI_Deposit_CHECKOUT(message: Message, trx_details: PGAnswer, shop: XanoShop) -> bool:
     await message.reply("May you doublecheck transaction id, pls. The specified transaction id has not gone to the bank")
     return True
