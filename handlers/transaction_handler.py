@@ -38,7 +38,7 @@ async def detect_message(message: Message):
     if xano_shops_answer == None:
         return
     # Run Request state analizator
-    state_machine_success = await state_machine.run_state_machine(message, transaction_id, xano_shops_answer)
+    state_machine_success = await state_machine.run_state_machine(message, transaction_id, xano_shops_answer, raw_text)
     if state_machine_success == False:
         print(f"State machine: FALSE. Chat: {message.chat.id}, Trx_id: {transaction_id}")
         return

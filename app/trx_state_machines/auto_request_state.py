@@ -22,7 +22,7 @@ async def check_trx(trxrequest_data: XanoTrxRequest, bot) -> None:
 
         # Answer in merchant chat
         await bot.set_message_reaction(chat_id=trxrequest_data.shop_support_chat_id, message_id=trxrequest_data.shop_message_id, reaction=[ReactionTypeEmoji(emoji="👍")])
-        await bot.send_message(chat_id=trxrequest_data.shop_support_chat_id, text='New transaction status: COMPLETED', reply_to_message_id=trxrequest_data.shop_message_id)
+        await bot.send_message(chat_id=trxrequest_data.shop_support_chat_id, text=f'New transaction status: COMPLETED\n\n{trxrequest_data.message_full_text}', reply_to_message_id=trxrequest_data.shop_message_id)
         # TASK: close clickup
         await CLICKUP_CLIENT.update_task_status(trxrequest_data.task_id_click_up, CU_TaskStatus.COMPLETE)
         await asyncio.sleep(10)

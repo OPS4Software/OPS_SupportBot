@@ -27,7 +27,7 @@ class XanoTrxRequest:
                  task_id_click_up: str = None,
                  provider_support_chat_id: int = None, provider_message_id: int = None,
                  shop_support_chat_id: int = None, shop_message_id: int = None,
-                 closed: bool = None, manual: bool = None, created_at: datetime = None, shop_api_key:str = None):
+                 closed: bool = None, manual: bool = None, created_at: datetime = None, shop_api_key:str = None, message_full_text:str = None):
         self.id = id
         self.shop_id = shop_id
         self.provider_id = provider_id
@@ -42,6 +42,7 @@ class XanoTrxRequest:
         self.manual = manual
         self.created_at = created_at
         self.shop_api_key = shop_api_key
+        self.message_full_text = message_full_text
 
 class XanoClient:
     def __init__(self):
@@ -232,7 +233,8 @@ class XanoClient:
                                               closed=item.get('Closed'),
                                               manual=item.get('ManualTicket'),
                                               created_at=item.get('created_at'),
-                                              shop_api_key=item.get('shop_api_key')
+                                              shop_api_key=item.get('shop_api_key'),
+                                              message_full_text=item.get('message_full_text')
                                               )
                 answer_array.append(trx_requests)
             except Exception as e:
@@ -240,7 +242,7 @@ class XanoClient:
                 return None
         return answer_array
     def post_new_trx_request(self, trx_id: str, shop_data: XanoShop, merch_mes_id:int, provider_data: XanoProvider, provider_mes_id: int, task_id_ca: str,
-                             is_manual_ticket: bool) -> bool:
+                             is_manual_ticket: bool, message_full_text: str) -> bool:
         url = f"{self.base_url}/trxrequests"
 
         headers = {
@@ -259,7 +261,8 @@ class XanoClient:
             "shop_message_id": merch_mes_id,
             "Closed": False,
             "ManualTicket": is_manual_ticket,
-            "shop_api_key": shop_data.api_key
+            "shop_api_key": shop_data.api_key,
+            "message_full_text": message_full_text
         }
 
         response = requests.post(url, json=payload, headers=headers)
@@ -290,7 +293,8 @@ class XanoClient:
             "shop_message_id": trx_data.shop_message_id,
             "Closed": trx_data.closed,
             "ManualTicket": trx_data.manual,
-            "shop_api_key": trx_data.shop_api_key
+            "shop_api_key": trx_data.shop_api_key,
+            "message_full_text": trx_data.message_full_text
         }
 
         response = requests.patch(url, json=payload, headers=headers)

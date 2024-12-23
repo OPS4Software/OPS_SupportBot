@@ -7,7 +7,7 @@ import app.request_state_machines.create_task.India.UPI_IMPS_666 as apm000
 
 
 # Check trx exists
-async def run_state_machine(message: Message, transaction_id: str, shops: list[XanoShop]) -> bool:
+async def run_state_machine(message: Message, transaction_id: str, shops: list[XanoShop], message_full_text) -> bool:
     pg_answer = None
     shop = None
     for possible_shop in shops:
@@ -22,10 +22,10 @@ async def run_state_machine(message: Message, transaction_id: str, shops: list[X
     terminal_id = pg_answer.terminal.split('_')[-1]
     match int(terminal_id):
         case 666:
-            success = await apm000.run_state(message, pg_answer, shop)
+            success = await apm000.run_state(message, pg_answer, shop, message_full_text)
             return success
         case 701:
-            success = await apm701.run_state(message, pg_answer, shop)
+            success = await apm701.run_state(message, pg_answer, shop, message_full_text)
             return success
     print(f"Terminal: {terminal_id}. Not found in states")
     return False
