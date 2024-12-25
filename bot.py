@@ -4,6 +4,7 @@ import asyncio
 import os
 from dotenv import load_dotenv
 
+from app.external_connections.postgres import POSTGRES
 from handlers.transaction_handler import router as transaction_router
 from handlers.setup_handler import router as setup_router
 

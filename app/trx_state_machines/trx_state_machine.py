@@ -1,6 +1,6 @@
 import asyncio
 from app.trx_state_machines import manual_request_state, auto_request_state
-from app.external_connections.xano import XANO_CLIENT
+from app.external_connections.postgres import POSTGRES
 class Trx_State_Machine:
     def __init__(self):
         self.polling_timeout = None
@@ -8,11 +8,8 @@ class Trx_State_Machine:
         self.bot = None
     async def start_polling(self, bot, polling_timeout: int = 10) -> None:
         self.bot = bot
-        xano_exists = XANO_CLIENT is not None
-
-        if xano_exists:
-            self.polling_timeout = polling_timeout
-            await self.run_polling()
+        self.polling_timeout = polling_timeout
+        await self.run_polling()
         return None
     async def stop_polling(self) -> None:
         self.active_session = False
@@ -31,15 +28,15 @@ class Trx_State_Machine:
         return
 
     async def update(self) -> None:
-        active_trx_requests = XANO_CLIENT.get_trx_requests()
-        if active_trx_requests is None: return
-        if len(active_trx_requests) < 1: return
-        for trx_request in active_trx_requests:
-            if trx_request.manual == False:
-                await auto_request_state.check_trx(trxrequest_data=trx_request, bot=self.bot)
+        active_tickets = POSTGRES.get_all_tickets(closed=False)
+        if active_tickets is None: return
+        if len(active_tickets) < 1: return
+        for ticket in active_tickets:
+            if ticket.manual == False:
+                await auto_request_state.check_trx(ticket_data=ticket, bot=self.bot)
                 continue
-            elif trx_request.manual == True:
-                await manual_request_state.check_trx(trxrequest_data=trx_request, bot=self.bot)
+            elif ticket.manual == True:
+                await manual_request_state.check_trx(ticket_data=ticket, bot=self.bot)
                 continue
 
 

@@ -6,7 +6,7 @@ from utils.validators import validate_transaction_id
 
 import app.request_state_machines.request_state_machine as state_machine
 
-from app.external_connections.xano import XANO_CLIENT, XanoShop
+from app.external_connections.postgres import POSTGRES, PostgresShop
 
 router = Router()
 
@@ -34,11 +34,11 @@ async def detect_message(message: Message):
         return
 
     # Checker: is chat register
-    xano_shops_answer:list[XanoShop] = XANO_CLIENT.get_shops_by_support_chat_id(str(message.chat.id))
-    if xano_shops_answer == None:
+    shops_answer:list[PostgresShop] = POSTGRES.get_shops_by_support_chat_id(message.chat.id)
+    if shops_answer == None:
         return
     # Run Request state analizator
-    state_machine_success = await state_machine.run_state_machine(message, transaction_id, xano_shops_answer, raw_text)
+    state_machine_success = await state_machine.run_state_machine(message, transaction_id, shops_answer, raw_text)
     if state_machine_success == False:
         print(f"State machine: FALSE. Chat: {message.chat.id}, Trx_id: {transaction_id}")
         return
