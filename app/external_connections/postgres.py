@@ -89,7 +89,7 @@ class Postgres:
 
         cur.close()
         conn.close()
-
+        print(f"chat: {support_chat_id}, res: {result}")
         if result == None:
             return None
 

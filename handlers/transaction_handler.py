@@ -37,6 +37,8 @@ async def detect_message(message: Message):
     shops_answer:list[PostgresShop] = POSTGRES.get_shops_by_support_chat_id(message.chat.id)
     if shops_answer == None:
         return
+    if len(shops_answer) < 1:
+        return
     # Run Request state analizator
     state_machine_success = await state_machine.run_state_machine(message, transaction_id, shops_answer, raw_text)
     if state_machine_success == False:
