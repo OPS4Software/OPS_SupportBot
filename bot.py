@@ -4,6 +4,7 @@ import asyncio
 import os
 from dotenv import load_dotenv
 
+from app.external_connections.postgres import POSTGRES
 from handlers.transaction_handler import router as transaction_router
 from handlers.setup_handler import router as setup_router
 
@@ -11,7 +12,7 @@ from app.trx_state_machines.trx_state_machine import Trx_State_Machine, TRX_STAT
 
 async def main():
     load_dotenv()
-    bot = Bot(token=os.getenv('TOKEN_DEV'))
+    bot = Bot(token=os.getenv('TOKEN'))
     await asyncio.gather(
         run_bot(bot),
         run_trx_state_machine(bot)

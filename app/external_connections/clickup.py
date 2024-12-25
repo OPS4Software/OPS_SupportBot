@@ -41,7 +41,7 @@ class ClickUpClient:
             "name": f"Ticket_{pg_trx_id}",
             "description": f"ID: {pg_trx_id}\n\nDescription: {description}",
             "assignees": [
-                 #89657945
+                 89657945
             ],
             "status": task_status.value,
             "tags": tags

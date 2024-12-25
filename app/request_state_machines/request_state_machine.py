@@ -1,17 +1,18 @@
 from aiogram.types import Message
 import app.external_connections.ops_pa as ops_pa
-from app.external_connections.xano import XanoShop
+from app.external_connections.postgres import POSTGRES, PostgresShop, PostgresApiKey
 
 import app.request_state_machines.create_task.India.UPI_IMPS_701 as apm701
 import app.request_state_machines.create_task.India.UPI_IMPS_666 as apm000
 
 
 # Check trx exists
-async def run_state_machine(message: Message, transaction_id: str, shops: list[XanoShop], message_full_text) -> bool:
+async def run_state_machine(message: Message, transaction_id: str, shops: list[PostgresShop], message_full_text) -> bool:
     pg_answer = None
     shop = None
     for possible_shop in shops:
-        pg_answer = ops_pa.check_status(possible_shop.api_key, transaction_id)
+        shop_api_key = POSTGRES.get_shop_api_key(possible_shop.pg_api_key_id).pg_api_key
+        pg_answer = ops_pa.check_status(shop_api_key, transaction_id)
         if pg_answer is not None:
             shop = possible_shop
             break
