@@ -19,11 +19,6 @@ async def get_chat_id(message: types.Message):
 
     await message.answer(f'Chat id: {message.chat.id}\nHave easy setup, {message.from_user.first_name}')
 
-@router.message(Command("test"))
-async def test(message: types.Message):
-    utils.debugger.TIME_DEBUGGER.debug_time("start")
-    shops = POSTGRES.get_shops_by_support_chat_id(message.chat.id)
-    utils.debugger.TIME_DEBUGGER.debug_time("finish")
 @router.message(Command("createapikey"))
 async def createapikey(message: types.Message):
     utils.debugger.TIME_DEBUGGER.debug_time("start")

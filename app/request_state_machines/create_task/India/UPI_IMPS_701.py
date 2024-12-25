@@ -27,6 +27,8 @@ async def state_UPI_Deposit(message: Message, trx_details: PGAnswer, shop: Postg
             return await state_UPI_Deposit_AWAITING_WEBHOOK(message=message, trx_details=trx_details, shop=shop, message_full_text=message_full_text)
         case PG_TRX_STATUS.AWAITING_REDIRECT.value:
             return await state_UPI_Deposit_AWAITING_REDIRECT(message=message, trx_details=trx_details, shop=shop, message_full_text=message_full_text)
+        case PG_TRX_STATUS.PENDING.value:
+            return await state_UPI_Deposit_PENDING(message=message, trx_details=trx_details, shop=shop, message_full_text=message_full_text)
     print(f"State 701, UPI Deposits. Trx {trx_details.trx_id} has undetectable state: {trx_details.state}")
     return False
 
@@ -35,6 +37,8 @@ async def state_UPI_Deposit_COMPLETED(message: Message, trx_details: PGAnswer, s
     await message.reply("This trx has status COMPLETED")
     return True
 async def state_UPI_Deposit_DECLINED(message: Message, trx_details: PGAnswer, shop: PostgresShop, message_full_text:str) -> bool:
+    return await beh_send_auto_ticket(message, trx_details, shop, message_full_text)
+async def state_UPI_Deposit_PENDING(message: Message, trx_details: PGAnswer, shop: PostgresShop, message_full_text:str) -> bool:
     return await beh_send_auto_ticket(message, trx_details, shop, message_full_text)
 async def state_UPI_Deposit_CANCELLED(message: Message, trx_details: PGAnswer, shop: PostgresShop, message_full_text:str) -> bool:
     await message.reply("May you doublecheck transaction id, pls. The specified transaction id has not gone to the bank")
