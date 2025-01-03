@@ -28,4 +28,10 @@ async def check_trx(ticket_data: PostgresTicketRequest, bot) -> None:
         # TASK: close clickup
         await CLICKUP_CLIENT.update_task_status(ticket_data.cu_task_id, CU_TaskStatus.COMPLETE)
         return
-    return
+    else:
+        #when ticket was created and if it more then 1hour ago, do= > more cases
+        #task more then 1 hour- change status to "manual" (mark in the database bool, put in cluck up tag "MANUAL" and assign Sergei to the task)
+        #case 1: no replyies,  no reaction no reply ---ping message "CHECK"
+        #case 2: provider says 'not our vpa,ugabuga...', forward for now new chat Egor Sergei and me
+        #case 3: 
+        return

@@ -38,7 +38,7 @@ class ClickUpClient:
             "team_id": self.team_id
         }
         payload = {
-            "name": f"Ticket_{pg_trx_id}",
+            "name": f"{pg_trx_id}",
             "description": f"ID: {pg_trx_id}\n\nDescription: {description}",
             "assignees": [
                  #89657945
