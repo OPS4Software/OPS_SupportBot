@@ -260,7 +260,7 @@ class Postgres:
         cur = conn.cursor()
 
         query = """
-        INSERT INTO tickets (shop_id, shop_support_message_id, 
+        INSERT INTO ticket_test (shop_id, shop_support_message_id, 
         provider_id, provider_support_message_id, 
         trx_id, cu_task_id, 
         closed, manual, message_full_text, created_at)
@@ -276,7 +276,46 @@ class Postgres:
         conn.close()
 
         return True
+	# get all tickets independantly from the closed value
+    def get_all_tickets_v2(self) -> list[PostgresTicketRequest] | None:
+        load_dotenv()
+        conn = psycopg2.connect(
+            dbname=os.getenv('ESQL_MAIN_DB'),
+            user=os.getenv('ESQL_USER'),
+            password=os.getenv('ESQL_PASS'),
+            host=os.getenv('ESQL_HOST'),
+            port=os.getenv('ESQL_PORT')
+        )
 
+        cur = conn.cursor()
+
+        query = "SELECT * FROM ticket_test "
+        cur.execute(query)
+
+        result = cur.fetchall()
+
+        cur.close()
+        conn.close()
+
+        if result == None:
+            return None
+
+        tickets = []
+        for row in result:
+            ticket = PostgresTicketRequest(id=row[0],
+                                           shop_id=row[1],
+                                           shop_message_id=row[2],
+                                           provider_id=row[3],
+                                           provider_message_id=row[4],
+                                           trx_id=row[5],
+                                           cu_task_id=row[6],
+                                           closed=row[7],
+                                           manual=row[8],
+                                           message_full_text=row[9],
+                                           created_at=row[10])
+            tickets.append(ticket)
+        return tickets
+    
     def get_all_tickets(self, closed: bool) -> list[PostgresTicketRequest] | None:
         load_dotenv()
         conn = psycopg2.connect(

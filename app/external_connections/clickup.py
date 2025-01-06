@@ -31,14 +31,14 @@ class ClickUpClient:
 
         headers = {
             "Content-Type": "application/json",
-            "Authorization": self.token
+            "Authorization": self.token 
         }
         query = {
             "custom_task_ids": "true",
             "team_id": self.team_id
         }
         payload = {
-            "name": f"Ticket_{pg_trx_id}",
+            "name": f"{pg_trx_id}",
             "description": f"ID: {pg_trx_id}\n\nDescription: {description}",
             "assignees": [
                  #89657945
@@ -66,8 +66,8 @@ class ClickUpClient:
 
         response = requests.post(url, files=file, headers=headers)
 
-        if delete_attachment:
-            os.remove(attachment)
+        # if delete_attachment:
+        #     os.remove(attachment)
 
         return response.json()
 
@@ -87,5 +87,27 @@ class ClickUpClient:
         }
 
         response = requests.put(url, json=payload, headers=headers, params=query)
+    async def update_task_tag(self, task_id, new_tag="manual",assignee_id=89657945):
+        tags_url = f"{self.base_url}/task/{task_id}/tag/{new_tag}"
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": self.token,
+            "accept": "application/json"
+        }
+        payload = {
+         "assignees": {
+                 "add":[89657945]
+        }
+        }
+        # Fetch the existing tags for the task
+        post_response = requests.post(tags_url, headers=headers)
+        if post_response.status_code != 200:
+            raise Exception(f"Failed to retrieve task {task_id}: {post_response.text}")
+
+        put_respone = requests.put( f"{self.base_url}/task/{task_id}", headers=headers,json=payload)    
+        print(put_respone.status_code)
+        
+        return post_response.json()
 
 CLICKUP_CLIENT = ClickUpClient()
