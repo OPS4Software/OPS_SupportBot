@@ -2,8 +2,7 @@ from enum import Enum
 
 import requests
 import json
-from app.external_connections.xano import XANO_CLIENT, XanoShop
-
+from aiogram.types import Message
 class PG_TRX_STATUS(Enum):
     COMPLETED = "COMPLETED"
     DECLINED = "DECLINED"
@@ -29,8 +28,7 @@ class PGAnswer:
         self.paymentMethod = paymentMethod
         self.terminal = terminal
 
-
-def check_status(shop_api_key:str, trx_id:str) -> PGAnswer | None:
+async def check_status(shop_api_key:str, trx_id:str) -> PGAnswer | None:
     if shop_api_key == None:
         return None
     url = f"https://app.inops.net/api/v1/payments/{trx_id}"
@@ -42,7 +40,7 @@ def check_status(shop_api_key:str, trx_id:str) -> PGAnswer | None:
 
     response = requests.request("GET", url, headers=headers, data=payload)
     data_raw = response.text
-
+    
     data = json.loads(data_raw)
     status = int(data['status'])
     if status == 200:
@@ -51,6 +49,8 @@ def check_status(shop_api_key:str, trx_id:str) -> PGAnswer | None:
                           paymentType=data['result']['paymentType'],
                           paymentMethod=data['result']['paymentMethod'],
                           terminal=data['result']['terminalName'])
+
+        
     else:
         answer = None
     return answer

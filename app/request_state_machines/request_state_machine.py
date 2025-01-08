@@ -12,12 +12,13 @@ async def run_state_machine(message: Message, transaction_id: str, shops: list[P
     shop = None
     for possible_shop in shops:
         shop_api_key = POSTGRES.get_shop_api_key(possible_shop.pg_api_key_id).pg_api_key
-        pg_answer = ops_pa.check_status(shop_api_key, transaction_id)
+        pg_answer = await ops_pa.check_status(shop_api_key, transaction_id)
         if pg_answer is not None:
             shop = possible_shop
             break
     if shop is None:
-        await message.reply("This transaction ID doesn't exists\nTry again with correct OPS transaction ID inside")
+        await message.reply("""This transaction ID doesn't exists\nTry again with correct OPS transaction ID inside \n Не удалось найти данный ID транзакции
+Перепроверьте, пожалуйста, ID транзакции и отправьте НОВЫЙ запрос""")
         return False
 
     match pg_answer.paymentMethod:

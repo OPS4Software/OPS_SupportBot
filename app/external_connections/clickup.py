@@ -21,11 +21,11 @@ class ClickUpClient:
     def create_manual_task(self, list_id, attachment, pg_trx_id, description:str = None):
         return self.create_task(list_id=list_id, attachment=attachment, pg_trx_id=pg_trx_id, description=description, task_status=CU_TaskStatus.TO_DO)
 
-    async def create_auto_task(self, list_id, attachment, pg_trx_id, description:str = None):
+    async def create_auto_task(self, list_id, attachments, pg_trx_id, description:str = None):
         tags = ["auto"]
-        return await self.create_task(list_id=list_id, attachment=attachment, pg_trx_id=pg_trx_id, description=description, task_status=CU_TaskStatus.IN_PROGRESS, tags=tags)
+        return await self.create_task(list_id=list_id, attachments=attachments, pg_trx_id=pg_trx_id, description=description, task_status=CU_TaskStatus.IN_PROGRESS, tags=tags)
 
-    async def create_task(self, list_id, attachment, pg_trx_id, description:str=None,
+    async def create_task(self, list_id, attachments, pg_trx_id, description:str=None,
                           task_status:CU_TaskStatus=CU_TaskStatus.TO_DO, tags:[str]=None):
         url = f"{self.base_url}/list/{list_id}/task"
 
@@ -38,7 +38,7 @@ class ClickUpClient:
             "team_id": self.team_id
         }
         payload = {
-            "name": f"Ticket_{pg_trx_id}",
+            "name": f"{pg_trx_id}",
             "description": f"ID: {pg_trx_id}\n\nDescription: {description}",
             "assignees": [
                  #89657945
@@ -50,27 +50,42 @@ class ClickUpClient:
         response = requests.post(url, json=payload, headers=headers, params=query)
         data = response.json()
 
-        if attachment and attachment != "":
-            self.add_attachment(data['id'], attachment, True)
+        # Attach multiple files
+        if attachments and isinstance(attachments, list):
+            for attachment in attachments:
+                self.add_attachment(data['id'], attachment, True)
 
         return data
 
     def add_attachment(self, task_id, attachment, delete_attachment=False):
         url = f"{self.base_url}/task/{task_id}/attachment"
         headers = {
-            "Authorization": self.token
-        }
-        file = {
-            "attachment": (attachment, open(attachment, 'rb'))
+        "Authorization": self.token,
+        # "Content-Type": "multipart/form-data"
         }
 
-        response = requests.post(url, files=file, headers=headers)
+        if not os.path.exists(attachment):
+            raise FileNotFoundError(f"The file {attachment} does not exist.")
 
-        if delete_attachment:
-            os.remove(attachment)
+        try:
+            with open(attachment, 'rb') as file:
+                files = {
+                    "attachment": (os.path.basename(attachment), file)
+                }
+                response = requests.post(url, files=files, headers=headers)
 
-        return response.json()
+            if response.status_code != 200:
+                raise Exception(f"Failed to upload attachment: {response.text}")
 
+        # Optionally delete the file
+            # if delete_attachment:
+            #     os.remove(attachment)
+
+            return response.json()
+        except Exception as e:
+            print(f"Error uploading attachment: {e}")
+            raise
+    
     async def update_task_status(self, task_id:str, task_status:CU_TaskStatus=CU_TaskStatus.IN_PROGRESS) -> None:
         url = f"{self.base_url}/task/{task_id}"
 
@@ -87,5 +102,27 @@ class ClickUpClient:
         }
 
         response = requests.put(url, json=payload, headers=headers, params=query)
+    async def update_task_tag(self, task_id, new_tag="manual",assignee_id=89657945):
+        tags_url = f"{self.base_url}/task/{task_id}/tag/{new_tag}"
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": self.token,
+            "accept": "application/json"
+        }
+        payload = {
+         "assignees": {
+                 "add":[89657945]
+        }
+        }
+        # Fetch the existing tags for the task
+        post_response = requests.post(tags_url, headers=headers)
+        if post_response.status_code != 200:
+            raise Exception(f"Failed to retrieve task {task_id}: {post_response.text}")
+
+        put_respone = requests.put( f"{self.base_url}/task/{task_id}", headers=headers,json=payload)    
+        print(put_respone.status_code)
+        
+        return post_response.json()
 
 CLICKUP_CLIENT = ClickUpClient()
