@@ -101,6 +101,7 @@ class Postgres:
 
         conn.commit()
         cur.close()
+        self._close_connection()
         return
     
     def get_shops_by_support_chat_id(self, support_chat_id:int) -> list[PostgresShop] | None:
@@ -130,8 +131,81 @@ class Postgres:
                                 notification_chat_id=row[6],
                                 pg_api_key_id=row[7])
             shops.append(shop)
-
+			
+        self._close_connection()
         return shops
+    
+    def get_assignee(self, id:int) -> list[PostgresShop] | None:
+        
+        conn = self._get_connection()
+
+        cur = conn.cursor()
+
+        query = "SELECT * FROM assignees WHERE id = %s"
+        cur.execute(query, (id,))
+
+        result = cur.fetchone()
+
+        cur.close()
+        if result == None:
+            return None
+			
+        self._close_connection()
+        return result
+    
+    def create_assignee(self, clickup_id: str) -> bool:
+
+        try:
+            conn = self._get_connection()
+            cur = conn.cursor()
+
+            query = "INSERT INTO assignees (clickup_id) VALUES ( %s)"
+            cur.execute(query, (clickup_id,))
+			
+            conn.commit()
+            cur.close()
+            self._close_connection()
+            return True
+        except Exception as e:
+            print(f"Error creating assignee: {e}")
+            return False
+
+    def delete_assignee(self, clickup_id: str) -> bool:
+        
+        try:
+            conn = self._get_connection()
+            cur = conn.cursor()
+
+            query = "DELETE FROM assignees WHERE clickup_id = %s"
+            cur.execute(query, (clickup_id,))
+        
+            conn.commit() 
+            cur.close()
+            self._close_connection()
+        
+            return cur.rowcount > 0
+        except Exception as e:
+            print(f"Error deleting assignee: {e}")
+            return False
+    
+    def get_all_assignees(self) -> list[str]:
+        try:
+            conn = self._get_connection()
+            cur = conn.cursor()
+
+            query = "SELECT clickup_id FROM assignees"
+            cur.execute(query)
+
+            results = cur.fetchall()
+
+            cur.close()
+            self._close_connection()
+
+            clickup_ids = [row[0] for row in results]
+            return clickup_ids
+        except Exception as e:
+            print(f"Error retrieving assignees: {e}")
+            return []
     
     def get_all_terminals(self) -> list[tuple[int, str]] | None:
         conn = self._get_connection_keys()
@@ -139,7 +213,7 @@ class Postgres:
 
         try:
             query = """
-                SELECT terminal_id, pg_api_key 
+                SELECT terminal_id, pg_api_key, id 
                 FROM shop_keys
                 WHERE terminal_id IS NOT NULL
                 AND pg_api_key IS NOT NULL;
@@ -150,7 +224,7 @@ class Postgres:
             if not result:
                 return None
 
-            return [(row[0], row[1]) for row in result]
+            return [(row[0], row[1], row[3]) for row in result]
 
         except Exception as e:
             print(f"Error getting terminals: {e}")
@@ -158,7 +232,7 @@ class Postgres:
             
         finally:
             cur.close()
-            conn.close()
+            self._close_connection_keys()
     
     def get_shop_by_id(self, shop_id:int) -> PostgresShop | None:
         
@@ -185,7 +259,25 @@ class Postgres:
                                 support_chat_id=row[5],
                                 notification_chat_id=row[6],
                                 pg_api_key_id=row[7])
+            self._close_connection()
             return shop
+
+    def get_chat_id(self, id):
+        conn = self._get_connection()
+        cur = conn.cursor()
+
+        query = "SELECT support_chat_id FROM shops WHERE id = %s"
+        cur.execute(query, (id,))
+
+        result = cur.fetchone()
+
+        cur.close()
+        self._close_connection()
+
+        if result is None:
+            return None
+
+        return result[0]
 
     def create_shop_api_key(self, shop_name:str, pg_id:int, pg_api_key:str) -> None:
         
@@ -200,7 +292,7 @@ class Postgres:
         cur.execute(query, (shop_name, pg_id, pg_api_key))
 
         conn.commit()
-        cur.close()
+        self._close_connection()
         
 
         return
@@ -217,7 +309,7 @@ class Postgres:
         result = cur.fetchall()
 
         cur.close()
-        
+        self._close_connection()
 
         if result == None:
             return None
@@ -242,7 +334,7 @@ class Postgres:
 
         conn.commit()
         cur.close()
-        
+        self._close_connection()
 
         return
     
@@ -270,6 +362,7 @@ class Postgres:
                                         terminal_index=row[3],
                                         cu_list_id=row[4],
                                         support_chat_id=row[5])
+            self._close_connection()
             return provider
 
     def create_new_ticket_request(self, trx_id: str, shop_data: PostgresShop, shop_mes_id: int, provider_data: PostgresProvider,
@@ -292,7 +385,7 @@ class Postgres:
 
         conn.commit()
         cur.close()
-        
+        self._close_connection()
 
         return True
     
@@ -308,7 +401,7 @@ class Postgres:
         result = cur.fetchall()
 
         cur.close()
-        
+        self._close_connection()
 
         if result == None:
             return None
@@ -341,7 +434,7 @@ class Postgres:
         result = cur.fetchall()
 
         cur.close()
-        
+        self._close_connection()
 
         if result == None:
             return None
@@ -377,7 +470,7 @@ class Postgres:
         conn.commit()
 
         cur.close()
-        
+        self._close_connection()
 
         return True
 
@@ -394,7 +487,7 @@ class Postgres:
         conn.commit()
 
         cur.close()
-        
+        self._close_connection()
 
         return True
 
@@ -410,7 +503,7 @@ class Postgres:
         result = cur.fetchall()
 
         cur.close()
-        
+        self._close_connection()
 
         if result == None:
             return None
@@ -443,6 +536,7 @@ class Postgres:
         finally:
             cur.close()
             conn.close()
+            self._close_connection()
         
     def __del__(self):
         """Ensure the connection is closed when the object is deleted."""
