@@ -3,6 +3,7 @@ from aiogram.types import Message, ReactionTypeEmoji
 from app.external_connections.ops_pa import PGAnswer, PG_PAYMENT_TYPE, PG_TRX_STATUS
 from app.external_connections.postgres import PostgresShop
 import app.request_state_machines.create_task.India.UPI_IMPS_701 as apm701
+import app.request_state_machines.create_task.India.UPI_IMPS_704 as apm704
 import app.request_state_machines.create_task.India.UPI_IMPS_666 as apm666
 async def run_state(message: Message, trx_details: PGAnswer, shop: PostgresShop, message_full_text:str) -> bool:
     match trx_details.state:
@@ -36,6 +37,9 @@ async def state_DECLINED(message: Message, trx_details: PGAnswer, shop: Postgres
         case 701:
             success = await apm701.beh_send_auto_ticket(message, trx_details, shop, message_full_text)
             return success
+        case 704:
+            success = await apm704.beh_send_auto_ticket(message, trx_details, shop, message_full_text)
+            return success
     print(f"Terminal: {terminal_id}. Not found in states")
 
 async def state_PENDING(message: Message, trx_details: PGAnswer, shop: PostgresShop, message_full_text:str) -> bool:
@@ -46,6 +50,9 @@ async def state_PENDING(message: Message, trx_details: PGAnswer, shop: PostgresS
             return success
         case 701:
             success = await apm701.beh_send_auto_ticket(message, trx_details, shop, message_full_text)
+            return success
+        case 704:
+            success = await apm704.beh_send_auto_ticket(message, trx_details, shop, message_full_text)
             return success
     print(f"Terminal: {terminal_id}. Not found in states")
 async def state_CANCELLED(message: Message, trx_details: PGAnswer, shop: PostgresShop, message_full_text:str) -> bool:
@@ -66,6 +73,9 @@ async def state_AWAITING_WEBHOOK(message: Message, trx_details: PGAnswer, shop: 
             return success
         case 701:
             success = await apm701.beh_send_auto_ticket(message, trx_details, shop, message_full_text)
+            return success
+        case 704:
+            success = await apm704.beh_send_auto_ticket(message, trx_details, shop, message_full_text)
             return success
     print(f"Terminal: {terminal_id}. Not found in states")
 async def state_AWAITING_REDIRECT(message: Message, trx_details: PGAnswer, shop: PostgresShop, message_full_text:str) -> bool:
